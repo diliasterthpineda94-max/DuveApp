@@ -1,4 +1,4 @@
-name: Compilar APK con Buildozer
+name: Compilar APK
 
 on:
   push:
@@ -6,16 +6,28 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Compilar con Buildozer
-      uses: ArtemSBulgakov/buildozer-action@v1
-      id: buildozer
+    - name: Configurar Python
+      uses: actions/setup-python@v5
       with:
-        command: buildozer android debug
+        python-version: '3.10'
+
+    - name: Instalar dependencias del sistema
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev
+
+    - name: Instalar Buildozer y Cython
+      run: |
+        pip install --upgrade pip
+        pip install Cython==0.29.36 buildozer
+
+    - name: Compilar con Buildozer
+      run: buildozer android debug
 
     - name: Subir APK generado
       uses: actions/upload-artifact@v4
